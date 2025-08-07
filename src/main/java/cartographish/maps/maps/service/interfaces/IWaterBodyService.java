@@ -12,7 +12,6 @@ public interface IWaterBodyService {
     WaterBody getWaterBodyById(Integer id) throws CustomException;
     Boolean checkName(String name) throws CustomException;
     
-    void createWaterBody(WaterBodyRequest req) throws CustomException;
-    void updateWaterBody(WaterBodyRequest req) throws CustomException;
-    void deleteWaterBody(WaterBodyRequest req) throws CustomException;
+    void createUpdateWaterBody(WaterBodyRequest req) throws CustomException;
+    void deleteWaterBody(Integer id) throws CustomException;
 }

@@ -5,13 +5,18 @@ import cartographish.maps.maps.dto.WaterBodyDTO;
 import cartographish.maps.maps.dto.ZoneDTO;
 import cartographish.maps.maps.exception.CustomException;
 import cartographish.maps.maps.exception.WaterBodyNotFoundException;
+import cartographish.maps.maps.models.Basin;
+import cartographish.maps.maps.models.GeoLocation;
 import cartographish.maps.maps.models.WaterBody;
+import cartographish.maps.maps.models.Zone;
 import cartographish.maps.maps.repository.WaterBodyRepository;
 import cartographish.maps.maps.request.WaterBodyRequest;
 import cartographish.maps.maps.service.interfaces.IWaterBodyService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,27 +46,61 @@ public class WaterBodyServiceImpl implements IWaterBodyService{
 
     @Override
     public Boolean checkName(String name) throws CustomException {
-         Optional<WaterBody> wOptional = waterBodyR.getNameByWaterBody(name);
+         Optional<WaterBody> wOptional = waterBodyR.findByName(name);
          return wOptional.isPresent();
     }
 
 
     @Override
-    public void createWaterBody(WaterBodyRequest req) throws CustomException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createWaterBody'");
+    @Transactional
+    public void createUpdateWaterBody(WaterBodyRequest req) throws CustomException {
+        WaterBody wBody;
+
+        if(req.getId() != null){
+            Optional<WaterBody> wOptional = waterBodyR.findById(req.getId());
+            if(wOptional.isEmpty()){
+                throw new CustomException("Unable to update: persistent body of water");
+            }
+            wBody = wOptional.get();
+        } else {
+            wBody = new WaterBody();
+        }
+
+        wBody.setName(req.getName());
+
+        Basin basin = new Basin();
+        if (req.getBasin() != null) {
+            basin.setBasinCode(req.getBasin().getBasinCode());
+            basin.setBasinName(req.getBasin().getBasinName());
+        }
+        wBody.setBasin(basin);
+
+        Zone zone = new Zone();
+        if (req.getZone() != null) {
+            zone.setZoneCode(req.getZone().getZoneCode());
+        }
+        wBody.setZone(zone);
+
+        wBody.setWaterCategory(req.getWaterCategory());
+
+        GeoLocation geoLocation = new GeoLocation();
+        if (req.getGeoLocation() != null) {
+            geoLocation.setLatitudine(req.getGeoLocation().getLatitude());
+            geoLocation.setLongitudine(req.getGeoLocation().getLongitude());
+        }
+        wBody.setGeoLocation(geoLocation);
+
+        waterBodyR.save(wBody);
     }
 
     @Override
-    public void updateWaterBody(WaterBodyRequest req) throws CustomException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateWaterBody'");
-    }
-
-    @Override
-    public void deleteWaterBody(WaterBodyRequest req) throws CustomException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteWaterBody'");
+    @Transactional
+    public void deleteWaterBody(Integer id) throws CustomException {
+        Optional<WaterBody> wOptional = waterBodyR.findById(id);
+        if(wOptional.isEmpty()){
+            throw new CustomException("Water Body not found with ID: " + id);
+        }
+        waterBodyR.deleteById(wOptional.get().getId());
     }
 
     
