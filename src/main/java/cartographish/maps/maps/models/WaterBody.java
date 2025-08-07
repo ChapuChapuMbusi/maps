@@ -10,6 +10,7 @@ public class WaterBody {
 
     @Id
     private String id;
+    private String name;
     private Basin basin;
     private Zone zone;
     private String waterQuality;

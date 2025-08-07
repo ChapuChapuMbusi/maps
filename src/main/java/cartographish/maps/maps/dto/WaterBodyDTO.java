@@ -13,4 +13,18 @@ public class WaterBodyDTO {
     private Zone zone;
     private String waterQuality;
 
+
+    public WaterBodyDTO(String id, String name, Basin basin, Zone zone, String waterQuality){
+
+        this.id = id;
+        this.name = name;
+        this.basin = basin;
+        this.zone = zone;
+        this.waterQuality = waterQuality;
+    }
+
+
+
+
 }
+
