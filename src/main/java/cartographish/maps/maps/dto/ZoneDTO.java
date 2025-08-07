@@ -5,7 +5,10 @@ import lombok.Data;
 @Data
 public class ZoneDTO {
 
-    private String id;
+    private Integer id;
     private String zoneCode;
 
+    public ZoneDTO(String zoneCode) {
+        this.zoneCode = zoneCode;
+    }
 }

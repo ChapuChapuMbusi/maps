@@ -2,13 +2,17 @@ package cartographish.maps.maps.service.interfaces;
 import cartographish.maps.maps.dto.WaterBodyDTO;
 import cartographish.maps.maps.exception.CustomException;
 import cartographish.maps.maps.models.WaterBody;
+import cartographish.maps.maps.request.WaterBodyRequest;
 
 import java.util.List;
 
 public interface IWaterBodyService {
 
     List<WaterBodyDTO> getAllWaterBodies();
-    WaterBody getWaterBodyById(String id) throws CustomException;
+    WaterBody getWaterBodyById(Integer id) throws CustomException;
     Boolean checkName(String name) throws CustomException;
     
+    void createWaterBody(WaterBodyRequest req) throws CustomException;
+    void updateWaterBody(WaterBodyRequest req) throws CustomException;
+    void deleteWaterBody(WaterBodyRequest req) throws CustomException;
 }

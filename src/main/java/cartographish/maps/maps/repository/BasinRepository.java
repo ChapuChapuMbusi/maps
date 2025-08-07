@@ -8,7 +8,7 @@ import cartographish.maps.maps.models.Basin;
 
 
 @Repository
-public interface BasinRepository extends MongoRepository<Basin, String>{
+public interface BasinRepository extends MongoRepository<Basin, Integer>{
 
     Optional<Basin> findByBasinCode(String basinCode);
     Optional<Basin> findByBasinName(String basinName);

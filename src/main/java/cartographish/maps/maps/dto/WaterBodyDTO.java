@@ -4,7 +4,7 @@ import lombok.Data;
 @Data
 public class WaterBodyDTO {
 
-    private String id;
+    private Integer id;
     private String name;
     private BasinDTO basinDTO;
     private ZoneDTO zoneDTO;
@@ -12,7 +12,7 @@ public class WaterBodyDTO {
     private GeoLocationDTO geoLocationDTO;
 
 
-    public WaterBodyDTO(String id, String name, BasinDTO basinDTO, ZoneDTO zoneDTO, String waterCategory, GeoLocationDTO geoLocationDTO){
+    public WaterBodyDTO(Integer id, String name, BasinDTO basinDTO, ZoneDTO zoneDTO, String waterCategory, GeoLocationDTO geoLocationDTO){
 
         this.id = id;
         this.name = name;

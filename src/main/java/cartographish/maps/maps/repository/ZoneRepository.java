@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import cartographish.maps.maps.models.Zone;
 
 @Repository
-public interface ZoneRepository extends MongoRepository<Zone, String>{
+public interface ZoneRepository extends MongoRepository<Zone, Integer>{
 
      Optional<Zone> findByZoneCode(String zoneCode);
 }
