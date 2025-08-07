@@ -10,8 +10,9 @@ public class WaterBody {
 
     @Id
     private String id;
-    private String name;
+    private String name; //Nome del corpo d'acqua esemp.(Fiume, Torrente, Lago, ecc.)
     private Basin basin;
     private Zone zone;
-    private String waterQuality;
+    private String waterCategory; //Categoria acqua (principale, secondaria A, secondaria B)
+    private GeoLocation geoLocation;
 }

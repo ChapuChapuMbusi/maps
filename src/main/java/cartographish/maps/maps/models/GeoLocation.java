@@ -5,8 +5,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 @Data
-@Document(collection = "zone")
-public class Zone {
+@Document(collection = "geo_location")
+public class GeoLocation {
 
-    private String zoneCode; //Codice dellla zona di pesca, esemp.(A, B, C, D)
+    private double latitudine;
+    private double longitudine;
 }

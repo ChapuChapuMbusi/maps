@@ -9,6 +9,7 @@ import cartographish.maps.maps.service.interfaces.IWaterBodyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -23,15 +24,25 @@ public class WaterBodyServiceImpl implements IWaterBodyService{
     }
 
     @Override
-    public WaterBodyDTO getWaterBodyById(String id) {
-       return waterBodyR.findById(id).map(this::convertToDTO).orElseThrow(() -> new WaterBodyNotFoundException(id));
+    public WaterBody getWaterBodyById(String id) throws CustomException {
+        Optional<WaterBody> wOptional = waterBodyR.findById(id);
+
+        if (wOptional.isEmpty()) {
+            throw new CustomException("Water Body not found with ID: " + id);
+        }
+       
+        return wOptional.get();
     }
+    
+
+    @Override
+    public Boolean checkName(String name) throws CustomException {
+         Optional<WaterBody> wOptional = waterBodyR.getWaterBodyByName(name);
+         return wOptional.isPresent();
+    }
+
 
     private WaterBodyDTO convertToDTO(WaterBody wB){
         return new WaterBodyDTO(wB.getId(), wB.getName(), wB.getBasin(), wB.getZone(), wB.getWaterQuality());
     }
-
-    
-
-
 }
