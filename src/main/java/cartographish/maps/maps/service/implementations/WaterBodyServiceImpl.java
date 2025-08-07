@@ -4,7 +4,6 @@ import cartographish.maps.maps.dto.GeoLocationDTO;
 import cartographish.maps.maps.dto.WaterBodyDTO;
 import cartographish.maps.maps.dto.ZoneDTO;
 import cartographish.maps.maps.exception.CustomException;
-import cartographish.maps.maps.exception.WaterBodyNotFoundException;
 import cartographish.maps.maps.models.Basin;
 import cartographish.maps.maps.models.GeoLocation;
 import cartographish.maps.maps.models.WaterBody;

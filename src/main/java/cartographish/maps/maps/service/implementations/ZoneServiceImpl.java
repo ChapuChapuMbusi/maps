@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cartographish.maps.maps.dto.ZoneDTO;
@@ -14,6 +15,7 @@ import cartographish.maps.maps.repository.ZoneRepository;
 import cartographish.maps.maps.request.ZoneRequest;
 import cartographish.maps.maps.service.interfaces.IZoneService;
 
+@Service
 public class ZoneServiceImpl implements IZoneService{
 
     @Autowired
@@ -55,7 +57,11 @@ public class ZoneServiceImpl implements IZoneService{
     @Override
     @Transactional
     public void deleteZone(Integer id) throws CustomException {
-       
+       Optional<Zone> zOptional = zoneR.findById(id);
+       if(zOptional.isEmpty()){
+            throw new CustomException("Zone not found with ID: " + id);
+        }
+        zoneR.deleteById(zOptional.get().getId());
     }
 
 }

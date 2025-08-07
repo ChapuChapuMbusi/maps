@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 @Data
-@Document(collection = "geo_location")
+@Document(collection = "geo_locations")
 public class GeoLocation {
 
     @Id
