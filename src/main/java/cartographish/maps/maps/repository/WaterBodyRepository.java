@@ -11,7 +11,7 @@ import cartographish.maps.maps.models.WaterBody;
 @Repository
 public interface WaterBodyRepository extends MongoRepository<WaterBody, Integer> {
 
-    Optional<WaterBody> getNameByWaterBody(String nome);
+    Optional<WaterBody> findByName(String nome);
     List<WaterBodyDTO> findByNameContainingIgnoreCase(String name);
    
 }
