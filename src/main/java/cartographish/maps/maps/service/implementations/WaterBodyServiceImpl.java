@@ -1,17 +1,24 @@
-package cartographish.maps.maps.service.impl;
+package cartographish.maps.maps.service.implementations;
 import cartographish.maps.maps.dto.WaterBodyDTO;
-import cartographish.maps.maps.models.WaterBody;
-import cartographish.maps.maps.repository.WaterBodyRepository;
-import cartographish.maps.maps.service.WaterBodyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import cartographish.maps.maps.service.interfaces.IWaterBodyService;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 public class WaterBodyServiceImpl implements IWaterBodyService{
 
-    private WaterBodyRepository waterBodyR;
+    @Override
+    public List<WaterBodyDTO> getAllWaterBodies() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllWaterBodies'");
+    }
+
+    @Override
+    public WaterBodyDTO getWaterBodyById(String id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getWaterBodyById'");
+    }
 
     
 

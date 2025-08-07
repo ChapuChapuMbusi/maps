@@ -1,4 +1,4 @@
-package cartographish.maps.maps.service;
+package cartographish.maps.maps.service.interfaces;
 import cartographish.maps.maps.dto.WaterBodyDTO;
 import java.util.List;
 

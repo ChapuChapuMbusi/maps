@@ -1,4 +1,7 @@
 package cartographish.maps.maps.dto;
+
+import cartographish.maps.maps.models.Basin;
+import cartographish.maps.maps.models.Zone;
 import lombok.Data;
 
 @Data
