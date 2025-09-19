@@ -1,4 +1,5 @@
 package cartographish.maps.maps.dto;
+
 import lombok.Data;
 
 @Data
@@ -10,7 +11,6 @@ public class WaterBodyDTO {
     private ZoneDTO zoneDTO;
     private String waterCategory;
     private GeoLocationDTO geoLocationDTO;
-
 
     public WaterBodyDTO(Integer id, String name, BasinDTO basinDTO, ZoneDTO zoneDTO, String waterCategory, GeoLocationDTO geoLocationDTO){
 
