@@ -1,12 +1,17 @@
 package cartographish.maps.maps.service.implementations;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import cartographish.maps.maps.dto.BasinDTO;
 import cartographish.maps.maps.exception.CustomException;
@@ -14,9 +19,13 @@ import cartographish.maps.maps.models.Basin;
 import cartographish.maps.maps.repository.BasinRepository;
 import cartographish.maps.maps.request.BasinRequest;
 import cartographish.maps.maps.service.interfaces.IBasinService;
+import reactor.core.publisher.Mono;
 
 @Service
 public class BasinServiceImpl implements IBasinService{
+
+    @Autowired
+    private WebClient webClient;
 
     @Autowired
     private BasinRepository basinR;
@@ -26,7 +35,7 @@ public class BasinServiceImpl implements IBasinService{
     }
 
     @Override
-    public Basin getBasinById(Integer id) throws CustomException {
+    public Basin getBasinById(String id) throws CustomException {
        Optional<Basin> bOptional = basinR.findById(id);
        if (bOptional.isEmpty()) {
            throw new CustomException("Basin not found with ID: " + id);
@@ -56,13 +65,63 @@ public class BasinServiceImpl implements IBasinService{
     }
 
     @Override
-    @Transactional
-    public void deleteBasin(Integer id) throws CustomException {
+    public void deleteBasin(String id) throws CustomException {
         Optional<Basin> bOptional = basinR.findById(id);
         if(bOptional.isEmpty()){
             throw new CustomException("Basin not found with ID: " + id);
         }
         basinR.deleteById(bOptional.get().getId());
+    }
+
+    @Override
+    public void fetchAndSaveExternalBasins() {
+          // SPARQL query
+    String sparqlQuery = """
+        PREFIX ispra-top: <https://w3id.org/italia/env/onto/top/>
+        SELECT DISTINCT (str(?year) AS ?year)
+        WHERE {
+          ?ind ispra-top:atTime ?time.
+          ?time ispra-top:year ?year.
+        }
+        ORDER BY ?year
+        """;
+
+    // Encode query
+    String encodedQuery = URLEncoder.encode(sparqlQuery, StandardCharsets.UTF_8);
+
+    // Body in x-www-form-urlencoded format
+    String body = "query=" + encodedQuery + "&format=json";
+
+    // POST request
+    Mono<Map> responseMono = webClient.post()
+            .uri("/sparql")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .bodyValue(body)
+            .retrieve()
+            .bodyToMono(Map.class);
+
+    Map<String, Object> response = responseMono.block();
+    if (response != null && response.containsKey("results")) {
+        Map<String, Object> results = (Map<String, Object>) response.get("results");
+        List<Map<String, Object>> bindings = (List<Map<String, Object>>) results.get("bindings");
+
+        for (Map<String, Object> binding : bindings) {
+            Map<String, String> yearMap = (Map<String, String>) binding.get("year");
+            String year = yearMap.get("value");
+
+            // Evita duplicati
+            if (!basinR.existsByBasinCode(year)) {
+                Basin basin = new Basin();
+                basin.setBasinCode(year);
+                basin.setBasinName("Anno " + year);
+                basinR.save(basin);
+            }
+        }
+
+        System.out.println("Basins salvati: " + bindings.size());
+    } else {
+        System.out.println("Nessuna risposta ricevuta dal server ISPRA o formattazione inattesa.");
+    }
     }
 
 }

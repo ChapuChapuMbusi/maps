@@ -38,7 +38,7 @@ public class ExternalApiServiceImpl implements IExternalApiService{
         .map(WaterBodyMapper::fromExternal)
         .collect(Collectors.toList());
 
-        return wBodyRepository.saveAll(waterBodies                      );
+        return wBodyRepository.saveAll(waterBodies);
     }
 
 }

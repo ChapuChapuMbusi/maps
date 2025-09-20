@@ -6,7 +6,7 @@ import lombok.Data;
 public class BasinDTO {
 
     
-    private Integer id;
+    private String id;
     private String basinCode;
     private String basinName;
 

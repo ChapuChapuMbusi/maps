@@ -10,7 +10,7 @@ import lombok.Data;
 public class Basin {
 
     @Id
-    private Integer id;
+    private String id;
     private String basinCode; //Codice del bacino ad esemp.(1, 2, 3, 4)
     private String basinName; //Nomde del bacino esem.(Po, Fiora, Tevere)
 }

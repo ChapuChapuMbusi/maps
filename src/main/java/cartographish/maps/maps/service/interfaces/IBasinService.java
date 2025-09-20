@@ -10,7 +10,9 @@ import cartographish.maps.maps.request.BasinRequest;
 
 public interface IBasinService {
     List<BasinDTO> getAllZones();
-    Basin getBasinById(Integer id) throws CustomException;
+    Basin getBasinById(String id) throws CustomException;
     void createUpdateBasin(BasinRequest req) throws CustomException;
-    void deleteBasin(Integer id) throws CustomException;
+    void deleteBasin(String id) throws CustomException;
+
+    void fetchAndSaveExternalBasins()throws CustomException;
 }
