@@ -1,7 +1,9 @@
 package cartographish.maps.maps.service.implementations;
 
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import cartographish.maps.maps.dto.BasinDTO;
 import cartographish.maps.maps.exception.CustomException;
@@ -74,54 +77,113 @@ public class BasinServiceImpl implements IBasinService{
     }
 
     @Override
-    public void fetchAndSaveExternalBasins() {
-          // SPARQL query
+@Transactional
+public List<Basin> fetchAndSaveExternalBasins() throws CustomException {
     String sparqlQuery = """
         PREFIX ispra-top: <https://w3id.org/italia/env/onto/top/>
-        SELECT DISTINCT (str(?year) AS ?year)
+        PREFIX ispra-plc: <https://w3id.org/italia/env/onto/place/>
+        PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT DISTINCT 
+          (str(?year) AS ?year)
+          ?bdesc
+          ?lat
+          ?long
+          ?mundesc
+          ?provdesc
+          ?regdesc
         WHERE {
-          ?ind ispra-top:atTime ?time.
-          ?time ispra-top:year ?year.
+          ?ind ispra-top:isMemberOf ?ic ;
+               ispra-top:atTime ?time .
+          ?time ispra-top:year ?year .
+
+          GRAPH <https://w3id.org/italia/env/ld/bathw/> {
+            ?ic ispra-top:isPartOf ?icmun .
+            ?icmun ispra-top:isPartOf ?collmun .
+            ?collmun ispra-top:isCollectionOf ?mun .
+            ?ic ispra-top:isPartOf ?collbath .
+            ?collbath ispra-top:isCollectionOf ?bath .
+
+            ?bath ispra-top:name ?bdesc ;
+                  geo:lat ?lat ;
+                  geo:long ?long .
+
+            ?mun rdfs:label ?mundesc ;
+                 ispra-plc:hasDirectHigherRank ?prov ;
+                 ispra-plc:hasRegion ?reg .
+            ?prov rdfs:label ?provdesc .
+            ?reg rdfs:label ?regdesc .
+          }
         }
         ORDER BY ?year
-        """;
+    """;
 
-    // Encode query
-    String encodedQuery = URLEncoder.encode(sparqlQuery, StandardCharsets.UTF_8);
+    try {
+        // Corpo della richiesta SPARQL
+        String body = "query=" + URLEncoder.encode(sparqlQuery, StandardCharsets.UTF_8) + "&format=json";
 
-    // Body in x-www-form-urlencoded format
-    String body = "query=" + encodedQuery + "&format=json";
+        // Chiamata al servizio SPARQL
+        Map<String, Object> response = webClient.post()
+                .uri("https://dati.isprambiente.it/sparql")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
 
-    // POST request
-    Mono<Map> responseMono = webClient.post()
-            .uri("/sparql")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .bodyValue(body)
-            .retrieve()
-            .bodyToMono(Map.class);
+        // Debug: stampo l'intera risposta SPARQL
+        System.out.println("SPARQL response: " + response);
 
-    Map<String, Object> response = responseMono.block();
-    if (response != null && response.containsKey("results")) {
-        Map<String, Object> results = (Map<String, Object>) response.get("results");
-        List<Map<String, Object>> bindings = (List<Map<String, Object>>) results.get("bindings");
-
-        for (Map<String, Object> binding : bindings) {
-            Map<String, String> yearMap = (Map<String, String>) binding.get("year");
-            String year = yearMap.get("value");
-
-            // Evita duplicati
-            if (!basinR.existsByBasinCode(year)) {
-                Basin basin = new Basin();
-                basin.setBasinCode(year);
-                basin.setBasinName("Anno " + year);
-                basinR.save(basin);
-            }
+        if (response == null || !response.containsKey("results")) {
+            System.out.println("Nessun risultato trovato nella risposta SPARQL.");
+            return List.of();
         }
 
-        System.out.println("Basins salvati: " + bindings.size());
-    } else {
-        System.out.println("Nessuna risposta ricevuta dal server ISPRA o formattazione inattesa.");
+        List<Map<String, Object>> bindings =
+                (List<Map<String, Object>>)((Map)response.get("results")).get("bindings");
+
+        if (bindings.isEmpty()) {
+            System.out.println("Bindings vuoti.");
+            return List.of();
+        }
+
+        List<Basin> basins = new ArrayList<>();
+        for (Map<String, Object> binding : bindings) {
+            String year = getValue(binding, "year");
+            String bdesc = getValue(binding, "bdesc");
+            String lat = getValue(binding, "lat");
+            String lon = getValue(binding, "long");
+
+            // Debug per ogni basin
+            System.out.println("Basin trovato -> year: " + year + ", name: " + bdesc + ", lat: " + lat + ", long: " + lon);
+
+            Basin basin = new Basin();
+            basin.setBasinCode(year);
+            basin.setBasinName(bdesc);
+            basins.add(basin);
+        }
+
+        // Salvataggio dei dati e debug
+        List<Basin> savedBasins = basinR.saveAll(basins);
+        System.out.println("Basins salvati: " + savedBasins.size());
+        return savedBasins;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new CustomException("Errore durante fetch SPARQL: " + e.getMessage());
     }
+}
+
+
+
+    // funzione di utilità per leggere i valori da SPARQL JSON
+    private String getValue(Map<String, Object> binding, String key) {
+        if (binding.containsKey(key)) {
+            Map<String, Object> val = (Map<String, Object>) binding.get(key);
+            return (String) val.get("value");
+        }
+        return null;
     }
 
 }

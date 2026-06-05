@@ -32,14 +32,15 @@ public class WaterBodyServiceImpl implements IWaterBodyService{
     }
 
     @Override
-    public WaterBody getWaterBodyById(Integer id) throws CustomException {
+    public WaterBodyDTO getWaterBodyById(Integer id) throws CustomException {
         Optional<WaterBody> wOptional = waterBodyR.findById(id);
 
         if (wOptional.isEmpty()) {
             throw new CustomException("Water Body not found with ID: " + id);
         }
        
-        return wOptional.get();
+        // Convertiamo l'entità trovata nel DTO richiesto usando la tua funzione convertToDTO
+        return convertToDTO(wOptional.get());
     }
     
 
@@ -110,5 +111,14 @@ public class WaterBodyServiceImpl implements IWaterBodyService{
 
         return new WaterBodyDTO(wB.getId(),wB.getName(),basinDTO,zoneDTO,wB.getWaterCategory(),geoLocationDTO);
     }
+
+    @Override
+public List<WaterBodyDTO> searchByPartialName(String name) {
+    // Aggiorna la chiamata usando il nuovo nome del metodo del repository
+    return waterBodyR.findByNameContainingIgnoreCase(name)
+            .stream()
+            .map(this::convertToDTO) // o la logica di mapping che stai usando
+            .collect(Collectors.toList());
+}
 
 }

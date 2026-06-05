@@ -1,16 +1,10 @@
 package cartographish.maps.maps.controller;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
+import cartographish.maps.maps.service.implementations.ExternalApiServiceImpl;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import cartographish.maps.maps.models.WaterBody;
-import cartographish.maps.maps.service.implementations.ExternalApiServiceImpl;
-
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/external")
@@ -18,16 +12,14 @@ public class ExternalApiController {
 
     private final ExternalApiServiceImpl externalApiService;
 
+    // Iniettiamo il Service nel Controller tramite costruttore
     public ExternalApiController(ExternalApiServiceImpl externalApiService) {
         this.externalApiService = externalApiService;
     }
 
-    @GetMapping("/water-bodies")
-    public ResponseEntity<List<WaterBody>> fetchAndSave(
-            @RequestParam double lat,
-            @RequestParam double lon
-    ) {
-        List<WaterBody> saved = externalApiService.fetchAndSavWaterBodies(lat, lon);
-        return ResponseEntity.ok(saved);
+    // Esponiamo l'endpoint GET: http://localhost:8080/api/external/corpi-idrici
+    @GetMapping("/corpi-idrici")
+    public Mono<String> getCorpiIdrici() {
+        return externalApiService.getCorpiIdriciReali();
     }
 }

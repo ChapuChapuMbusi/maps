@@ -14,5 +14,5 @@ public interface IBasinService {
     void createUpdateBasin(BasinRequest req) throws CustomException;
     void deleteBasin(String id) throws CustomException;
 
-    void fetchAndSaveExternalBasins()throws CustomException;
+    List<Basin> fetchAndSaveExternalBasins()throws CustomException;
 }

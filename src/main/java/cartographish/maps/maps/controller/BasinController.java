@@ -5,14 +5,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cartographish.maps.maps.exception.CustomException;
-import cartographish.maps.maps.service.implementations.BasinServiceImpl;
+import cartographish.maps.maps.service.interfaces.IBasinService; // Importiamo l'interfaccia
 
 @RestController
 @RequestMapping("/api/external")
 public class BasinController {
-private final BasinServiceImpl externalBasinService;
 
-    public BasinController(BasinServiceImpl externalBasinService) {
+    // Modificato da BasinServiceImpl a IBasinService
+    private final IBasinService externalBasinService;
+
+    // Anche il costruttore ora accetta l'interfaccia
+    public BasinController(IBasinService externalBasinService) {
         this.externalBasinService = externalBasinService;
     }
 

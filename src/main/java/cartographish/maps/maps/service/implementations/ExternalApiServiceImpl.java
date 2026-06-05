@@ -1,44 +1,36 @@
 package cartographish.maps.maps.service.implementations;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import cartographish.maps.maps.mapper.WaterBodyMapper;
-import cartographish.maps.maps.models.WaterBody;
-import cartographish.maps.maps.repository.WaterBodyRepository;
-import cartographish.maps.maps.response.ExternalWaterBodyResponse;
-import cartographish.maps.maps.service.interfaces.IExternalApiService;
+import reactor.core.publisher.Mono;
 
 @Service
-public class ExternalApiServiceImpl implements IExternalApiService{
-    
+public class ExternalApiServiceImpl {
+
     private final WebClient webClient;
-    private final WaterBodyRepository wBodyRepository;
 
-    public ExternalApiServiceImpl(WebClient.Builder builder, WaterBodyRepository respo){
-
-        this.webClient = builder.baseUrl("https://dati.isprambiente.it").build();
-        this.wBodyRepository = respo;
+    // Il costruttore ha lo stesso nome della classe e riceve il Builder di Spring
+    public ExternalApiServiceImpl(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl("https://dati.isprambiente.it").build();
     }
 
-    @Override
-    public List<WaterBody> fetchAndSavWaterBodies(double lat, double lon) {
-       
-        List<ExternalWaterBodyResponse> externalList = webClient.get()
-        .uri("/bacini?lat={lat}&lon={lon}", lat, lon)
-        .retrieve()
-        .bodyToFlux(ExternalWaterBodyResponse.class)
-        .collectList()
-        .block();
+    public Mono<String> getCorpiIdriciReali() {
+    // Query di test: prendi 10 triple a caso
+    String sparqlQuery = "SELECT * WHERE { ?s ?p ?o } LIMIT 10";
 
-        List<WaterBody> waterBodies = externalList.stream()
-        .map(WaterBodyMapper::fromExternal)
-        .collect(Collectors.toList());
-
-        return wBodyRepository.saveAll(waterBodies);
+    return this.webClient.post()
+            .uri("/sparql") // Usiamo il path relativo visto che hai impostato il baseUrl
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .header("Accept", "application/sparql-results+json")
+            .bodyValue("query=" + URLEncoder.encode(sparqlQuery, StandardCharsets.UTF_8) 
+                       + "&format=application/sparql-results+json")
+            .retrieve()
+            .bodyToMono(String.class);
     }
-
 }
