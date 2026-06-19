@@ -25,8 +25,9 @@ public class TesserinoContextConsumer {
      * Ascolta i messaggi sul topic "tesserino-session-events".
      * Quando il modulo security pubblica il contesto, questo metodo lo intercetta.
      */
-    @KafkaListener(topics = "tesserino-session-events", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "tesserino-session-events", groupId = "maps-consumer-group")
     public void ascoltaContestoTesserino(String messaggioJson) {
+        System.out.println(">>> [MAPS] RICEVUTO MESSAGGIO RAW: " + messaggioJson);
         log.info("Ricevuto nuovo evento di sessione da Kafka: {}", messaggioJson);
         
         try {
